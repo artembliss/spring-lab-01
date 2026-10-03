@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">Book catalogue</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container">
+    <header>
+        <p class="eyebrow">SPRING MVC · LAB 05</p>
+        <h1 th:text="${title}">Book catalogue</h1>
+        <p class="subtitle">A small in-memory collection exposed through MVC and REST.</p>
+    </header>
+
+    <p th:if="${message}" class="flash" th:text="${message}">Book has been added</p>
+
+    <section class="panel">
+        <h2>Filter by author</h2>
+        <form method="get" action="/books" class="filter-form">
+            <input type="search" name="author" th:value="${author}" placeholder="e.g. Bloch">
+            <button type="submit">Apply filter</button>
+            <a href="/books">Reset</a>
+        </form>
+    </section>
+
+    <section class="panel">
+        <div class="section-heading">
+            <h2>Available books</h2>
+            <span th:text="${#lists.size(books)} + ' item(s)'">3 item(s)</span>
+        </div>
+        <table>
+            <thead><tr><th>#</th><th>Title</th><th>Author</th><th>Year</th></tr></thead>
+            <tbody>
+            <tr th:each="book : ${books}">
+                <td th:text="${book.id}">1</td>
+                <td th:text="${book.title}">Title</td>
+                <td th:text="${book.author}">Author</td>
+                <td th:text="${book.year}">2020</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(books)}">
+                <td colspan="4" class="empty">No books match this filter.</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Add a book</h2>
+        <form method="post" action="/books" class="add-form">
+            <label>Title<input name="title" required></label>
+            <label>Author<input name="author" required></label>
+            <label>Year<input name="year" type="number" min="1" max="2100" required></label>
+            <button type="submit">Add book</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
