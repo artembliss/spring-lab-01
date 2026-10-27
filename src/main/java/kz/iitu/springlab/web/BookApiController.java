@@ -15,7 +15,9 @@ import kz.iitu.springlab.catalog.BookService;
 import kz.iitu.springlab.web.dto.BookMapper;
 import kz.iitu.springlab.web.dto.BookRequest;
 import kz.iitu.springlab.web.dto.BookResponse;
-import kz.iitu.springlab.web.dto.PagedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,37 +43,22 @@ public class BookApiController {
         this.mapper = mapper;
     }
 
-    @Operation(summary = "List all books with optional filtering or paging")
-    @ApiResponse(responseCode = "200", description = "Collection of books or paged response")
+    @Operation(summary = "List books with pagination and sorting")
+    @ApiResponse(responseCode = "200", description = "Page of books")
     @GetMapping
-    public Object list(
+    public Page<BookResponse> list(
+            @Parameter(description = "Filter by genre")
+            @RequestParam(required = false) Genre genre,
             @Parameter(description = "Filter by author name")
             @RequestParam(required = false) String author,
-            @Parameter(description = "Limit number of returned items")
-            @RequestParam(required = false) Integer limit,
-            @Parameter(description = "Page number (0-based) for pagination (Variant 1)")
-            @RequestParam(required = false) Integer page,
-            @Parameter(description = "Page size for pagination (Variant 1)")
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(size = 5, sort = "title") Pageable pageable
     ) {
-        List<BookResponse> responses = mapper.toResponseList(service.findAll(author));
-
-        if (page != null) {
-            int pageSize = Math.max(1, size);
-            int pageIndex = Math.max(0, page);
-            int totalElements = responses.size();
-            int totalPages = (int) Math.ceil((double) totalElements / pageSize);
-            int fromIndex = Math.min(pageIndex * pageSize, totalElements);
-            int toIndex = Math.min(fromIndex + pageSize, totalElements);
-            List<BookResponse> pageContent = responses.subList(fromIndex, toIndex);
-            return new PagedResponse<>(pageContent, pageIndex, pageSize, totalElements, totalPages);
+        if (author != null && !author.isBlank()) {
+            return service.getRepository()
+                    .findByAuthorNameContainingIgnoreCase(author.trim(), pageable)
+                    .map(mapper::toResponse);
         }
-
-        if (limit != null && limit >= 0) {
-            return responses.stream().limit(limit).toList();
-        }
-
-        return responses;
+        return service.find(genre, pageable).map(mapper::toResponse);
     }
 
     @Operation(summary = "Search books by title")
@@ -82,6 +69,27 @@ public class BookApiController {
             @RequestParam(defaultValue = "") String title
     ) {
         return mapper.toResponseList(service.searchByTitle(title));
+    }
+
+    @Operation(summary = "Find books by publisher name (Variant 1)")
+    @ApiResponse(responseCode = "200", description = "Books belonging to the publisher")
+    @GetMapping("/publisher")
+    public List<BookResponse> byPublisher(@RequestParam String name) {
+        return mapper.toResponseList(service.findByPublisherName(name));
+    }
+
+    @Operation(summary = "Find top 3 books by genre ordered by year descending")
+    @ApiResponse(responseCode = "200", description = "Top 3 books in genre")
+    @GetMapping("/top3")
+    public List<BookResponse> top3(@RequestParam Genre genre) {
+        return mapper.toResponseList(service.getRepository().findTop3ByGenreOrderByYearDesc(genre));
+    }
+
+    @Operation(summary = "Archive books older than a given year (bulk update)")
+    @ApiResponse(responseCode = "200", description = "Number of books archived")
+    @PostMapping("/archive")
+    public int archiveOlderThan(@RequestParam int year) {
+        return service.archiveOlderThan(year);
     }
 
     @Operation(summary = "Find a book by its identifier")
@@ -112,15 +120,14 @@ public class BookApiController {
     ) {
         Book saved = service.create(mapper.toDomain(request));
         return ResponseEntity
-                .created(URI.create("/api/books/" + saved.id()))
+                .created(URI.create("/api/books/" + saved.getId()))
                 .body(mapper.toResponse(saved));
     }
 
     @Operation(summary = "Update an existing book")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The book was updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid request payload",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload"),
             @ApiResponse(responseCode = "404", description = "No book with this id",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })

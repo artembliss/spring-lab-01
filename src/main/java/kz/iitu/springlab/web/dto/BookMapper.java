@@ -1,7 +1,7 @@
 package kz.iitu.springlab.web.dto;
 
-import java.time.Instant;
 import java.util.List;
+import kz.iitu.springlab.catalog.Author;
 import kz.iitu.springlab.catalog.Book;
 import org.springframework.stereotype.Component;
 
@@ -9,24 +9,22 @@ import org.springframework.stereotype.Component;
 public class BookMapper {
 
     public Book toDomain(BookRequest request) {
-        return new Book(
-                null,
-                request.title(),
-                request.author(),
-                request.year(),
-                request.genre(),
-                Instant.now()
-        );
+        Book book = new Book(request.title(), request.genre(), request.year());
+        if (request.author() != null && !request.author().isBlank()) {
+            book.setAuthor(new Author(request.author().trim(), "Unknown"));
+        }
+        return book;
     }
 
     public BookResponse toResponse(Book book) {
+        String authorName = book.getAuthor() != null ? book.getAuthor().getName() : null;
         return new BookResponse(
-                book.id(),
-                book.title(),
-                book.author(),
-                book.year(),
-                book.genre(),
-                book.createdAt()
+                book.getId(),
+                book.getTitle(),
+                authorName,
+                book.getYear(),
+                book.getGenre(),
+                book.getCreatedAt()
         );
     }
 

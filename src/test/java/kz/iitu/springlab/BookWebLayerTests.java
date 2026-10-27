@@ -19,19 +19,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext
 class BookWebLayerTests {
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void restCrudUsesExpectedStatusCodes() throws Exception {
-        mockMvc.perform(get("/api/books").param("author", "Bloch").param("limit", "1"))
+        mockMvc.perform(get("/api/books").param("author", "Bloch").param("size", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Effective Java"));
+                .andExpect(jsonPath("$.content[0].title").value("Effective Java"));
 
         mockMvc.perform(get("/api/books/999"))
                 .andExpect(status().isNotFound())
@@ -167,10 +169,10 @@ class BookWebLayerTests {
     void variantOnePaginationReturnsPagedMetadata() throws Exception {
         mockMvc.perform(get("/api/books").param("page", "0").param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.number").value(0))
                 .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.totalElements").value(3))
-                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.totalElements").value(8))
+                .andExpect(jsonPath("$.totalPages").value(4))
                 .andExpect(jsonPath("$.content.length()").value(2));
     }
 

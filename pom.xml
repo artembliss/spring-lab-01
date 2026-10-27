@@ -86,6 +86,17 @@
 			<version>3.1.1</version>
 		</dependency>
 
+		<!-- Spring Data JPA & PostgreSQL for Laboratory Work 8 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 
 		<!-- Tests -->
 		<dependency>
