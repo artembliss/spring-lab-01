@@ -43,7 +43,7 @@ public class BookPageController {
             return "books/form";
         }
 
-        Book saved = service.create(new Book(null, form.getTitle(), form.getAuthor(), form.getYear()));
+        Book saved = service.create(new Book(null, form.getTitle(), form.getAuthor(), form.getYear(), form.getGenre()));
         redirect.addFlashAttribute("message", "Book “" + saved.title() + "” has been added");
         return "redirect:/books";
     }

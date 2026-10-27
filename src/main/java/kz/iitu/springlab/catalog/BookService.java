@@ -3,7 +3,6 @@ package kz.iitu.springlab.catalog;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,22 +30,44 @@ public class BookService {
                 .toList();
     }
 
+    public Optional<Book> findOptionalById(long id) {
+        return repository.findById(id);
+    }
+
     public Book findById(long id) {
         return repository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
     }
 
     public Book create(Book book) {
-        return repository.save(new Book(null, book.title(), book.author(), book.year()));
+        if (repository.existsByTitleIgnoreCase(book.title())) {
+            throw new DuplicateTitleException(book.title());
+        }
+        return repository.save(book);
+    }
+
+    public Book update(long id, Book book) {
+        Book existing = findById(id);
+        Book updated = new Book(
+                id,
+                book.title(),
+                book.author(),
+                book.year(),
+                book.genre() != null ? book.genre() : existing.genre(),
+                existing.createdAt()
+        );
+        return repository.save(updated);
     }
 
     public Optional<Book> replace(long id, Book book) {
         if (repository.findById(id).isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(repository.save(new Book(id, book.title(), book.author(), book.year())));
+        return Optional.of(update(id, book));
     }
 
-    public boolean delete(long id) {
-        return repository.deleteById(id);
+    public void delete(long id) {
+        if (!repository.deleteById(id)) {
+            throw new BookNotFoundException(id);
+        }
     }
 }

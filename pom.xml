@@ -79,6 +79,13 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- OpenAPI & Swagger UI for Laboratory Work 7 -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.1.1</version>
+		</dependency>
+
 
 		<!-- Tests -->
 		<dependency>

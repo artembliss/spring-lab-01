@@ -40,12 +40,12 @@ class BookWebLayerTests {
                 .andExpect(jsonPath("$.detail").value("Book with id 999 was not found"));
 
         mockMvc.perform(post("/api/books").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Pro Spring 6\",\"author\":\"Cosmina\",\"year\":2023}"))
+                        .content("{\"title\":\"Pro Spring 6\",\"author\":\"Cosmina\",\"year\":2023,\"genre\":\"TECHNOLOGY\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", containsString("/api/books/")));
 
         mockMvc.perform(put("/api/books/1").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Effective Java, 3rd Edition\",\"author\":\"Joshua Bloch\",\"year\":2018}"))
+                        .content("{\"title\":\"Effective Java, 3rd Edition\",\"author\":\"Joshua Bloch\",\"year\":2018,\"genre\":\"TECHNOLOGY\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
 
@@ -139,6 +139,39 @@ class BookWebLayerTests {
                 .andExpect(status().isUnsupportedMediaType());
         mockMvc.perform(get("/api/books").accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isNotAcceptable());
+    }
+
+    @Test
+    void duplicateTitleReturnsConflictProblemDetail() throws Exception {
+        mockMvc.perform(post("/api/books").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Effective Java\",\"author\":\"Joshua Bloch\",\"year\":2018,\"genre\":\"TECHNOLOGY\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.title").value("Effective Java"))
+                .andExpect(jsonPath("$.detail").value(containsString("Effective Java")));
+    }
+
+    @Test
+    void openApiDocsAndSwaggerUiAreAvailable() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.paths['/api/books']").exists());
+
+        mockMvc.perform(get("/swagger-ui/index.html"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void variantOnePaginationReturnsPagedMetadata() throws Exception {
+        mockMvc.perform(get("/api/books").param("page", "0").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.content.length()").value(2));
     }
 
     @Test
