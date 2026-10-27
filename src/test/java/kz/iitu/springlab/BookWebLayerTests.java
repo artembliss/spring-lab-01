@@ -60,6 +60,11 @@ class BookWebLayerTests {
                 .andExpect(view().name("books/list"))
                 .andExpect(content().string(containsString("Spring in Action")));
 
+        mockMvc.perform(get("/books/list"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("books/list"))
+                .andExpect(model().attributeExists("books"));
+
         mockMvc.perform(post("/books")
                         .param("title", "Java Precisely")
                         .param("author", "Sestoft")
@@ -127,6 +132,7 @@ class BookWebLayerTests {
     @Test
     void mappingFailuresProduceRequiredErrorStatuses() throws Exception {
         mockMvc.perform(get("/api/books/abc")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/books/abc")).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/nothing")).andExpect(status().isNotFound());
         mockMvc.perform(delete("/api/books")).andExpect(status().isMethodNotAllowed());
         mockMvc.perform(post("/api/books").contentType(MediaType.TEXT_PLAIN).content("not json"))

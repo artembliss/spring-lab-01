@@ -24,7 +24,7 @@ public class BookPageController {
         this.service = service;
     }
 
-    @GetMapping
+    @GetMapping({"", "/list"})
     public String list(@RequestParam(required = false) String author, Model model) {
         model.addAttribute("books", service.findAll(author));
         model.addAttribute("author", author == null ? "" : author);
@@ -55,7 +55,7 @@ public class BookPageController {
         return "books/form";
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public String details(@PathVariable long id, Model model) {
         model.addAttribute("book", service.findById(id));
         return "books/details";
