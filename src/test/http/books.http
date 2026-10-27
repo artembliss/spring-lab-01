@@ -1,24 +1,36 @@
-### 1. List all books
-GET http://localhost:8080/api/books
+### ==========================================
+### LABORATORY WORK 7 & 8: HTTP CLIENT REQUESTS
+### ==========================================
+
+### 1. List all books with pagination and default sort (Lab 8 Task 4.1)
+GET http://localhost:8080/api/books?page=0&size=3
 Accept: application/json
 
-### 2. List books filtered by author
+### 2. List books with pagination and sorting by year descending (Lab 8 Task 4.2)
+GET http://localhost:8080/api/books?page=1&size=3&sort=year,desc
+Accept: application/json
+
+### 3. List books filtered by author
 GET http://localhost:8080/api/books?author=Bloch
 Accept: application/json
 
-### 3. List books with pagination (Variant 1)
-GET http://localhost:8080/api/books?page=0&size=2
+### 4. List books filtered by genre (Lab 8)
+GET http://localhost:8080/api/books?genre=TECHNOLOGY&page=0&size=5
 Accept: application/json
 
-### 4. Get book by id (found - 200)
+### 5. Sort by non-existent field (Lab 8 Task 4.2 error test)
+GET http://localhost:8080/api/books?sort=nosuchfield
+Accept: application/json
+
+### 6. Get book by id (200 OK)
 GET http://localhost:8080/api/books/1
 Accept: application/json
 
-### 5. Get book by id (not found - 404 ProblemDetail)
+### 7. Get book by id - missing book (404 Not Found ProblemDetail)
 GET http://localhost:8080/api/books/999
 Accept: application/problem+json
 
-### 6. Create book (success - 201 + Location header)
+### 8. Create a valid book (201 Created + Location header)
 POST http://localhost:8080/api/books
 Content-Type: application/json
 
@@ -29,7 +41,7 @@ Content-Type: application/json
   "genre": "TECHNOLOGY"
 }
 
-### 7. Create book with invalid body (blank title - 400 ProblemDetail)
+### 9. Create book with invalid body (blank title - 400 Bad Request ProblemDetail)
 POST http://localhost:8080/api/books
 Content-Type: application/json
 
@@ -40,7 +52,7 @@ Content-Type: application/json
   "genre": "TECHNOLOGY"
 }
 
-### 8. Create book with duplicate title (conflict - 409 ProblemDetail)
+### 10. Create book with duplicate title (409 Conflict ProblemDetail)
 POST http://localhost:8080/api/books
 Content-Type: application/json
 
@@ -51,7 +63,7 @@ Content-Type: application/json
   "genre": "TECHNOLOGY"
 }
 
-### 9. Update existing book (200)
+### 11. Update existing book (200 OK)
 PUT http://localhost:8080/api/books/1
 Content-Type: application/json
 
@@ -62,14 +74,30 @@ Content-Type: application/json
   "genre": "TECHNOLOGY"
 }
 
-### 10. Delete book (first attempt - 204 No Content)
+### 12. Delete book (204 No Content)
 DELETE http://localhost:8080/api/books/1
 
-### 11. Delete same book again (idempotency check - 404 Not Found ProblemDetail)
+### 13. Delete same book again (404 Not Found ProblemDetail)
 DELETE http://localhost:8080/api/books/1
 
-### 12. OpenAPI specification document
+### 14. Derived Query: Top 3 books in genre ordered by year desc (Lab 8 Task 3.1)
+GET http://localhost:8080/api/books/top3?genre=TECHNOLOGY
+Accept: application/json
+
+### 15. Search by title (Lab 8 Task 3.1)
+GET http://localhost:8080/api/books/search?title=action
+Accept: application/json
+
+### 16. Variant 1: Query books by publisher name (Lab 8 Variant 1)
+GET http://localhost:8080/api/books/publisher?name=Addison-Wesley
+Accept: application/json
+
+### 17. Bulk update: Archive books older than year (Lab 8 Task 3.2)
+POST http://localhost:8080/api/books/archive?year=2010
+
+### 18. OpenAPI documentation JSON
 GET http://localhost:8080/v3/api-docs
+Accept: application/json
 
-### 13. Swagger UI page
+### 19. Swagger UI interface
 GET http://localhost:8080/swagger-ui.html
