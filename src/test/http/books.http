@@ -1,0 +1,75 @@
+### 1. List all books
+GET http://localhost:8080/api/books
+Accept: application/json
+
+### 2. List books filtered by author
+GET http://localhost:8080/api/books?author=Bloch
+Accept: application/json
+
+### 3. List books with pagination (Variant 1)
+GET http://localhost:8080/api/books?page=0&size=2
+Accept: application/json
+
+### 4. Get book by id (found - 200)
+GET http://localhost:8080/api/books/1
+Accept: application/json
+
+### 5. Get book by id (not found - 404 ProblemDetail)
+GET http://localhost:8080/api/books/999
+Accept: application/problem+json
+
+### 6. Create book (success - 201 + Location header)
+POST http://localhost:8080/api/books
+Content-Type: application/json
+
+{
+  "title": "Design Patterns",
+  "author": "Erich Gamma",
+  "year": 1994,
+  "genre": "TECHNOLOGY"
+}
+
+### 7. Create book with invalid body (blank title - 400 ProblemDetail)
+POST http://localhost:8080/api/books
+Content-Type: application/json
+
+{
+  "title": "",
+  "author": "Erich Gamma",
+  "year": 1994,
+  "genre": "TECHNOLOGY"
+}
+
+### 8. Create book with duplicate title (conflict - 409 ProblemDetail)
+POST http://localhost:8080/api/books
+Content-Type: application/json
+
+{
+  "title": "Effective Java",
+  "author": "Joshua Bloch",
+  "year": 2018,
+  "genre": "TECHNOLOGY"
+}
+
+### 9. Update existing book (200)
+PUT http://localhost:8080/api/books/1
+Content-Type: application/json
+
+{
+  "title": "Effective Java 3rd Edition",
+  "author": "Joshua Bloch",
+  "year": 2018,
+  "genre": "TECHNOLOGY"
+}
+
+### 10. Delete book (first attempt - 204 No Content)
+DELETE http://localhost:8080/api/books/1
+
+### 11. Delete same book again (idempotency check - 404 Not Found ProblemDetail)
+DELETE http://localhost:8080/api/books/1
+
+### 12. OpenAPI specification document
+GET http://localhost:8080/v3/api-docs
+
+### 13. Swagger UI page
+GET http://localhost:8080/swagger-ui.html

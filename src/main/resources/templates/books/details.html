@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${book.title}">Book</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container form-container">
+    <section class="panel">
+        <p class="eyebrow">BOOK DETAILS</p>
+        <h1 th:text="${book.title}">Title</h1>
+        <p><strong th:text="${book.author}">Author</strong> · <span th:text="${book.year}">2026</span></p>
+        <a th:href="@{/books}" th:text="#{form.back}">Back to catalogue</a>
+    </section>
+</main>
+</body>
+</html>
